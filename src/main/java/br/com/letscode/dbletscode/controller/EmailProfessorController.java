@@ -8,10 +8,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,9 +29,9 @@ public class EmailProfessorController {
         return emailProfessorRepository.findAll();
     }
 
-    @GetMapping("/findbyid")
+    @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.FOUND)
-    public Optional<EmailProfessor> findById(@RequestParam Integer id) {
+    public Optional<EmailProfessor> findById(@PathVariable int id) {
         return emailProfessorRepository.findById(id);
     }
 
@@ -41,17 +41,18 @@ public class EmailProfessorController {
         return emailProfessorRepository.save(emailProfessor);
     }
 
-    @DeleteMapping
-    public void deleteById(@RequestBody Integer id) {
-        emailProfessorRepository.deleteById(id);
+    @DeleteMapping("/{id}")
+    public void deleteById(@PathVariable int id) {
+        if (isExists(id)) emailProfessorRepository.deleteById(id);
     }
 
-    @PatchMapping
-    public EmailProfessor updateEmail(@RequestBody EmailProfessor email) {
-        if (emailProfessorRepository.existsById(email.getId())) {
-            this.deleteById(email.getId());
-            return this.inserirEmail(email);
-        }
+    @PatchMapping("/{id}")
+    public EmailProfessor updateEmail(@PathVariable int id, @RequestBody EmailProfessor email) {
+        if (isExists(id)) return this.inserirEmail(email);
         else throw new IAmATeapot();
+    }
+
+    private boolean isExists(int id) {
+        return emailProfessorRepository.existsById(id);
     }
 }

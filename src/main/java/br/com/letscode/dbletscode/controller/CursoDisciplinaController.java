@@ -8,10 +8,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,29 +29,30 @@ public class CursoDisciplinaController {
         return cursoDisciplinaRepository.findAll();
     }
 
-    @GetMapping("/findbyid")
-    public Optional<CursoDisciplina> findById(@RequestParam Integer id) {
+    @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.FOUND)
+    public Optional<CursoDisciplina> findById(@PathVariable int id) {
         return cursoDisciplinaRepository.findById(id);
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.FOUND)
+    @ResponseStatus(HttpStatus.CREATED)
     public CursoDisciplina inserirCursoDisciplina(@RequestBody CursoDisciplina cursoDisciplina) {
         return cursoDisciplinaRepository.save(cursoDisciplina);
     }
 
-    @DeleteMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public void deleteById(@RequestBody Integer id) {
-        cursoDisciplinaRepository.deleteById(id);
+    @DeleteMapping("/{id}")
+    public void deleteById(@PathVariable int id) {
+        if (isExists(id)) cursoDisciplinaRepository.deleteById(id);
     }
 
-    @PatchMapping
-    public CursoDisciplina updateCursoDisciplina(@RequestBody CursoDisciplina cd){
-        if (cursoDisciplinaRepository.existsById(cd.getId())){
-            this.deleteById(cd.getId());
-            return this.inserirCursoDisciplina(cd);
-        }
+    @PatchMapping("/{id}")
+    public CursoDisciplina updateCursoDisciplina(@PathVariable int id, @RequestBody CursoDisciplina cd){
+        if (isExists(id)) return this.inserirCursoDisciplina(cd);
         else throw new IAmATeapot();
+    }
+
+    private boolean isExists(int id) {
+        return cursoDisciplinaRepository.existsById(id);
     }
 }

@@ -8,10 +8,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,9 +29,9 @@ public class CursoRestController {
         return cursoRepository.findAll();
     }
 
-    @GetMapping("/findbyid")
+    @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.FOUND)
-    public Optional<Curso> findById(@RequestParam Integer id) {
+    public Optional<Curso> findById(@PathVariable int id) {
         return cursoRepository.findById(id);
     }
 
@@ -41,17 +41,18 @@ public class CursoRestController {
         return cursoRepository.save(curso);
     }
 
-    @DeleteMapping
-    public void deleteById(@RequestBody Integer id) {
-        cursoRepository.deleteById(id);
+    @DeleteMapping("/{id}")
+    public void deleteById(@PathVariable int id) {
+        if (isExists(id)) cursoRepository.deleteById(id);
     }
 
-    @PatchMapping
-    public Curso updateCurso(@RequestBody Curso curso) {
-        if (cursoRepository.existsById(curso.getCodigoCurso())) {
-            this.deleteById(curso.getCodigoCurso());
-            return this.inserirCurso(curso);
-        }
+    @PatchMapping("/{id}")
+    public Curso updateCurso(@PathVariable int id, @RequestBody Curso curso) {
+        if (isExists(id)) return this.inserirCurso(curso);
         else throw new IAmATeapot();
+    }
+
+    private boolean isExists(int id) {
+        return cursoRepository.existsById(id);
     }
 }

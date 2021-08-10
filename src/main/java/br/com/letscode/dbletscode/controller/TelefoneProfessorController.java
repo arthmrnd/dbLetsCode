@@ -8,10 +8,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,9 +29,9 @@ public class TelefoneProfessorController {
         return telefoneProfessorRepository.findAll();
     }
 
-    @GetMapping("/findbyid")
+    @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.FOUND)
-    public Optional<TelefoneProfessor> findById(@RequestParam Integer id) {
+    public Optional<TelefoneProfessor> findById(@PathVariable int id) {
         return telefoneProfessorRepository.findById(id);
     }
 
@@ -41,17 +41,18 @@ public class TelefoneProfessorController {
         return telefoneProfessorRepository.save(telefoneProfessor);
     }
 
-    @DeleteMapping
-    public void deleteById(@RequestBody Integer id) {
-        telefoneProfessorRepository.deleteById(id);
+    @DeleteMapping("/{id}")
+    public void deleteById(@PathVariable int id) {
+        if (isExists(id)) telefoneProfessorRepository.deleteById(id);
     }
 
-    @PatchMapping
-    public TelefoneProfessor updateEmail(@RequestBody TelefoneProfessor telefoneProfessor) {
-        if (telefoneProfessorRepository.existsById(telefoneProfessor.getId())) {
-            this.deleteById(telefoneProfessor.getId());
-            return this.inserirEmail(telefoneProfessor);
-        }
+    @PatchMapping("/{id}")
+    public TelefoneProfessor updateEmail(@PathVariable int id, @RequestBody TelefoneProfessor telefoneProfessor) {
+        if (isExists(id)) return this.inserirEmail(telefoneProfessor);
         else throw new IAmATeapot();
+    }
+
+    private boolean isExists(int id) {
+        return telefoneProfessorRepository.existsById(id);
     }
 }
